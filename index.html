@@ -2,179 +2,167 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Ravi's Trading Assistant</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Trading">
+<meta name="theme-color" content="#0a0a0f">
+<title>Trading Assistant</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  :root {
-    --bg: #0a0a0f; --surface: #13131a; --surface2: #1c1c26; --border: #2a2a3a;
-    --green: #00d4aa; --red: #ff4d6d; --yellow: #ffd166; --blue: #4d9fff;
-    --purple: #9b5de5; --text: #e8e8f0; --muted: #6b6b80;
-    --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-  }
-  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; overflow-x: hidden; }
-  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 12px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
-  .topbar-title { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
-  .topbar-time { font-size: 12px; color: var(--muted); }
-  .mode-badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; }
-  .mode-ccs { background: rgba(0,212,170,0.15); color: var(--green); }
-  .mode-orb { background: rgba(77,159,255,0.15); color: var(--blue); }
-  .mode-eod { background: rgba(155,93,229,0.15); color: var(--purple); }
-  .mode-closed { background: rgba(107,107,128,0.15); color: var(--muted); }
-  .main { padding: 16px; max-width: 500px; margin: 0 auto; }
-  .market-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
-  .market-pill { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px; text-align: center; }
-  .market-pill .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-  .market-pill .value { font-size: 14px; font-weight: 600; }
-  .up { color: var(--green); } .down { color: var(--red); } .neutral { color: var(--yellow); }
-  .tabs { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 4px; margin-bottom: 14px; gap: 4px; }
-  .tab { flex: 1; padding: 9px; border-radius: 8px; border: none; background: none; color: var(--muted); font-family: var(--font); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; text-align: center; }
-  .tab.active { background: var(--surface2); color: var(--text); }
-  .response-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 14px; min-height: 180px; }
-  .response-scroll { max-height: 55vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-  .response-content { font-size: 14px; line-height: 1.65; }
-  .loader { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 40px 0; }
-  .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loader-text { font-size: 13px; color: var(--muted); text-align: center; }
-  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-  .btn { padding: 15px; border-radius: 14px; border: none; font-family: var(--font); font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity 0.15s, transform 0.1s; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-  .btn:active { transform: scale(0.97); opacity: 0.85; }
-  .btn-green { background: var(--green); color: #000; }
-  .btn-blue { background: var(--blue); color: #000; }
-  .btn-purple { background: var(--purple); color: #fff; }
-  .btn-surface { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
-  .btn-label { font-size: 10px; font-weight: 500; opacity: 0.7; }
-  .btn-full { width: 100%; padding: 16px; border-radius: 14px; border: none; font-family: var(--font); font-size: 15px; font-weight: 600; cursor: pointer; margin-bottom: 10px; transition: opacity 0.15s, transform 0.1s; }
-  .btn-full:active { transform: scale(0.99); opacity: 0.85; }
-  .setup-screen { padding: 32px 20px; max-width: 500px; margin: 0 auto; }
-  .setup-logo { text-align: center; margin-bottom: 28px; }
-  .setup-logo .icon { font-size: 48px; margin-bottom: 10px; }
-  .setup-logo h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
-  .setup-logo p { color: var(--muted); margin-top: 5px; font-size: 14px; }
-  .setup-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 14px; }
-  .setup-card h3 { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
-  .input-group { margin-bottom: 14px; }
-  .input-group label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; }
-  .input-group input, .input-group textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; color: var(--text); font-family: var(--font); font-size: 14px; outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
-  .input-group input:focus, .input-group textarea:focus { border-color: var(--green); }
-  .input-group textarea { min-height: 90px; resize: vertical; }
-  .error-banner { background: rgba(255,77,109,0.1); border: 1px solid rgba(255,77,109,0.3); border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--red); margin-bottom: 14px; display: none; }
-  .success-banner { background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.3); border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--green); margin-bottom: 14px; display: none; }
-  .hidden { display: none !important; }
-  .safe-bottom { height: 32px; }
-  .md-section { margin-bottom: 14px; }
-  .md-h2 { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
-  .md-p { font-size: 14px; line-height: 1.65; margin-bottom: 8px; color: var(--text); }
-  .tag-green { color: var(--green); font-weight: 600; }
-  .tag-red { color: var(--red); font-weight: 600; }
-  .tag-yellow { color: var(--yellow); font-weight: 600; }
-  .tag-blue { color: var(--blue); font-weight: 600; }
-  b, strong { font-weight: 600; color: var(--text); }
-  .shortcut-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; font-family: 'SF Mono', monospace; font-size: 12px; color: var(--green); word-break: break-all; line-height: 1.6; margin: 8px 0; }
-  .copy-row { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
-  .copy-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; color: var(--muted); font-size: 12px; cursor: pointer; font-family: var(--font); }
-  .step { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; }
-  .step-num { width: 26px; height: 26px; border-radius: 50%; background: var(--green); color: #000; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-  .step-content strong { display: block; font-size: 14px; margin-bottom: 2px; }
-  .step-content span { color: var(--muted); font-size: 13px; line-height: 1.5; }
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --bg:#0a0a0f; --surface:#13131a; --surface2:#1c1c26; --border:#2a2a3a;
+  --green:#00d4aa; --red:#ff4d6d; --yellow:#ffd166; --blue:#4d9fff;
+  --purple:#9b5de5; --text:#e8e8f0; --muted:#6b6b80;
+  --font:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;
+}
+body { background:var(--bg); color:var(--text); font-family:var(--font); min-height:100vh; overflow-x:hidden; padding-top:env(safe-area-inset-top); }
+.topbar { display:flex; align-items:center; justify-content:space-between; padding:14px 20px 12px; background:var(--surface); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
+.topbar-title { font-size:17px; font-weight:600; letter-spacing:-0.3px; }
+.topbar-time { font-size:12px; color:var(--muted); margin-top:2px; }
+.mode-badge { font-size:11px; font-weight:600; padding:4px 10px; border-radius:20px; letter-spacing:0.5px; text-transform:uppercase; }
+.mode-ccs { background:rgba(0,212,170,0.15); color:var(--green); }
+.mode-orb { background:rgba(77,159,255,0.15); color:var(--blue); }
+.mode-eod { background:rgba(155,93,229,0.15); color:var(--purple); }
+.mode-closed { background:rgba(107,107,128,0.15); color:var(--muted); }
+.main { padding:16px; max-width:500px; margin:0 auto; }
+.market-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+.market-pill { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px; text-align:center; }
+.market-pill .lbl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
+.market-pill .val { font-size:14px; font-weight:600; }
+.up{color:var(--green);} .down{color:var(--red);} .neutral{color:var(--yellow);}
+.tabs { display:flex; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:4px; margin-bottom:14px; gap:4px; }
+.tab { flex:1; padding:9px; border-radius:8px; border:none; background:none; color:var(--muted); font-family:var(--font); font-size:13px; font-weight:500; cursor:pointer; transition:all 0.2s; text-align:center; }
+.tab.active { background:var(--surface2); color:var(--text); }
+.response-box { background:var(--surface2); border:1px solid var(--border); border-radius:16px; padding:18px; margin-bottom:14px; min-height:180px; }
+.response-scroll { max-height:52vh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+.response-content { font-size:14px; line-height:1.65; }
+.loader { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:40px 0; }
+.spinner { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--green); border-radius:50%; animation:spin 0.8s linear infinite; }
+@keyframes spin{to{transform:rotate(360deg);}}
+.loader-text { font-size:13px; color:var(--muted); text-align:center; }
+.btn-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+.btn { padding:15px; border-radius:14px; border:none; font-family:var(--font); font-size:15px; font-weight:600; cursor:pointer; transition:opacity 0.15s,transform 0.1s; display:flex; flex-direction:column; align-items:center; gap:3px; }
+.btn:active{transform:scale(0.97);opacity:0.85;}
+.btn-green{background:var(--green);color:#000;}
+.btn-blue{background:var(--blue);color:#000;}
+.btn-purple{background:var(--purple);color:#fff;}
+.btn-surface{background:var(--surface);color:var(--text);border:1px solid var(--border);}
+.btn-label{font-size:10px;font-weight:500;opacity:0.7;}
+.btn-full{width:100%;padding:16px;border-radius:14px;border:none;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;margin-bottom:10px;transition:opacity 0.15s,transform 0.1s;}
+.btn-full:active{transform:scale(0.99);opacity:0.85;}
+.setup-screen{padding:32px 20px;max-width:500px;margin:0 auto;}
+.setup-logo{text-align:center;margin-bottom:24px;}
+.setup-logo .icon{font-size:48px;margin-bottom:10px;}
+.setup-logo h1{font-size:24px;font-weight:700;letter-spacing:-0.5px;}
+.setup-logo p{color:var(--muted);margin-top:5px;font-size:14px;}
+.setup-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:14px;}
+.setup-card h3{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px;}
+.input-group{margin-bottom:14px;}
+.input-group label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;}
+.input-group input,.input-group textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 13px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color 0.2s;-webkit-appearance:none;}
+.input-group input:focus,.input-group textarea:focus{border-color:var(--green);}
+.input-group textarea{min-height:90px;resize:vertical;}
+.banner{border-radius:10px;padding:12px 14px;font-size:13px;margin-bottom:14px;display:none;}
+.banner-error{background:rgba(255,77,109,0.1);border:1px solid rgba(255,77,109,0.3);color:var(--red);}
+.banner-success{background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.3);color:var(--green);}
+.hidden{display:none!important;}
+.safe-bottom{height:max(32px,env(safe-area-inset-bottom));}
+.md-p{font-size:14px;line-height:1.7;margin-bottom:10px;}
+b,strong{font-weight:600;color:var(--text);}
+.tg{color:var(--green);font-weight:600;}
+.tr{color:var(--red);font-weight:600;}
+.ty{color:var(--yellow);font-weight:600;}
+.tb{color:var(--blue);font-weight:600;}
+
+/* Toast notification */
+.toast{position:fixed;top:max(60px,env(safe-area-inset-top,0px) + 60px);left:50%;transform:translateX(-50%) translateY(-20px);background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 20px;font-size:14px;font-weight:500;z-index:999;opacity:0;transition:all 0.3s;pointer-events:none;max-width:calc(100vw - 40px);text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast-green{border-color:rgba(0,212,170,0.4);color:var(--green);}
+.toast-red{border-color:rgba(255,77,109,0.4);color:var(--red);}
+
+/* Install banner */
+.install-banner{background:rgba(77,159,255,0.1);border:1px solid rgba(77,159,255,0.2);border-radius:12px;padding:14px;margin-bottom:14px;font-size:13px;line-height:1.5;color:var(--text);}
+.install-banner strong{color:var(--blue);}
+
+/* Key input row */
+.key-row{display:flex;gap:8px;align-items:stretch;}
+.key-row input{flex:1;}
+.key-row .show-btn{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0 12px;color:var(--muted);font-size:13px;cursor:pointer;white-space:nowrap;font-family:var(--font);}
 </style>
 </head>
 <body>
 
-<!-- SETUP SCREEN -->
+<div id="toast" class="toast"></div>
+
+<!-- SETUP -->
 <div id="setupScreen">
-  <div class="setup-screen">
-    <div class="setup-logo">
-      <div class="icon">📈</div>
-      <h1>Trading Assistant</h1>
-      <p>CCS & ORB — powered by Claude</p>
-    </div>
-
-    <div id="errorBanner" class="error-banner"></div>
-    <div id="successBanner" class="success-banner"></div>
-
-    <div class="setup-card">
-      <h3>⚙️ API Configuration</h3>
-      <div class="input-group">
-        <label>Anthropic API Key</label>
-        <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off" />
-      </div>
-      <button class="btn-full btn-surface" onclick="testApiKey()" style="margin-bottom:0; font-size:14px;">
-        🔬 Test API Key
-      </button>
-    </div>
-
-    <div class="setup-card">
-      <h3>👤 Profile</h3>
-      <div class="input-group">
-        <label>Your Name</label>
-        <input type="text" id="nameInput" placeholder="Ravi" value="Ravi" />
-      </div>
-    </div>
-
-    <div class="setup-card">
-      <h3>📋 Strategy Context</h3>
-      <div class="input-group">
-        <label>Your CCS & ORB strategy (pre-filled)</label>
-        <textarea id="strategyInput">CCS Strategy - Margin Account (5SS72242):
-- PLTR: 100 shares, avg $138.34, active call Oct 16 $140, net premium $502
-- RDDT: 100 shares, avg $157.35, active call Aug 21 $200, premium $1,645
-- NFLX: 100 shares, avg $84.94, no call (need strike above $84.94)
-- Rules: 10-15% OTM for underwater stocks. Close at 50% profit. Roll when within $5 of strike. Never assign at a loss.
-
-ORB Strategy - Agentic Account:
-- Trade Mon/Wed/Fri only, QQQ/SPY 0DTE
-- 15-min opening range 9:30-9:45 AM CST, enter on breakout
-- Max $150 per trade. Stop -40%, profit +50%
-- Exit by 1:30 PM CST
-- Skip if: VIX>25, FOMC/CPI day, flat pre-market (±0.2%), early close
-- Calls only if QQQ pre-market above yesterday close, puts if below</textarea>
-      </div>
-    </div>
-
-    <button class="btn-full btn-green" onclick="saveSetup()">Save & Launch →</button>
-
-    <div class="setup-card">
-      <h3>📱 iPhone Shortcut Instructions</h3>
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-content">
-          <strong>Save this page</strong>
-          <span>In Safari: Share → Add to Home Screen → name it "Trading"</span>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-content">
-          <strong>Open Shortcuts app</strong>
-          <span>Tap + → New Shortcut → Add Action → search "Open URLs"</span>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-content">
-          <strong>Set the URL with auto-run</strong>
-          <span>Copy the URL of this page and add <b>?auto=1</b> at the end</span>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">4</div>
-        <div class="step-content">
-          <strong>Name it "Trading Check"</strong>
-          <span>Add to home screen or lock screen for one-tap access</span>
-        </div>
-      </div>
-    </div>
-    <div class="safe-bottom"></div>
+<div class="setup-screen">
+  <div class="setup-logo">
+    <div class="icon">📈</div>
+    <h1>Trading Assistant</h1>
+    <p>CCS & ORB — powered by Claude AI</p>
   </div>
+
+  <div id="installBanner" class="install-banner hidden">
+    <strong>📱 Add to Home Screen for best experience</strong><br>
+    Tap the Share button in Safari → "Add to Home Screen" → This saves your API key permanently.
+  </div>
+
+  <div id="errorBanner" class="banner banner-error"></div>
+  <div id="successBanner" class="banner banner-success"></div>
+
+  <div class="setup-card">
+    <h3>🔑 Anthropic API Key</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Get from console.anthropic.com → API Keys. $5 credit lasts months.</p>
+    <div class="input-group" style="margin-bottom:10px;">
+      <div class="key-row">
+        <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." autocomplete="off" />
+        <button class="show-btn" onclick="toggleKeyVisibility()">Show</button>
+      </div>
+    </div>
+    <button class="btn-full btn-surface" onclick="testApiKey()" style="margin-bottom:0;font-size:14px;">🔬 Test Key</button>
+  </div>
+
+  <div class="setup-card">
+    <h3>📋 Your Strategy (pre-filled)</h3>
+    <div class="input-group" style="margin-bottom:0;">
+      <textarea id="strategyInput">CCS - Margin Account (5SS72242):
+PLTR: 100sh @ $138.34 avg, active call Oct 16 $140, net premium $502
+RDDT: 100sh @ $157.35 avg, active call Aug 21 $200, premium $1,645
+NFLX: 100sh @ $84.94 avg, no call yet (need strike above $84.94)
+Rules: 10-15% OTM for underwater stocks. Close at 50% profit. Roll when within $5 of strike. Never assign at a loss.
+
+ORB - Agentic Account (450842349):
+Trade Mon/Wed/Fri only, QQQ/SPY 0DTE options
+Opening range: first 15 min (9:30-9:45 AM CST), enter on confirmed breakout
+Max $150 per trade. Stop -40%, profit +50%, sell half at +100%
+Exit ALL positions by 1:30 PM CST
+Skip if: VIX>25, FOMC/CPI day, pre-market flat ±0.2%, early close day, buying power under $150
+Direction: calls only if QQQ pre-market above yesterday close, puts if below</textarea>
+    </div>
+  </div>
+
+  <button class="btn-full btn-green" onclick="saveSetup()">Save & Launch →</button>
+
+  <div class="setup-card">
+    <h3>📱 iPhone Setup (one time)</h3>
+    <div style="font-size:13px;color:var(--muted);line-height:1.7;">
+      <div style="margin-bottom:10px;"><strong style="color:var(--text);">1. Add to Home Screen</strong><br>Safari → Share → Add to Home Screen → "Trading"</div>
+      <div style="margin-bottom:10px;"><strong style="color:var(--text);">2. Open from Home Screen</strong><br>Always open the app from your home screen icon — NOT from Safari. This is what makes localStorage persist.</div>
+      <div style="margin-bottom:10px;"><strong style="color:var(--text);">3. Create Shortcut</strong><br>Shortcuts app → + → Add Action → Open URLs → paste your GitHub Pages URL with <strong style="color:var(--green);">?auto=1</strong> at the end</div>
+      <div><strong style="color:var(--text);">4. Allow Notifications</strong><br>When prompted by the app, tap Allow so you get alerts when action is needed</div>
+    </div>
+  </div>
+  <div class="safe-bottom"></div>
+</div>
 </div>
 
 <!-- MAIN APP -->
 <div id="mainScreen" class="hidden">
   <div class="topbar">
     <div>
-      <div class="topbar-title">📈 Trading Assistant</div>
+      <div class="topbar-title">📈 Trading</div>
       <div class="topbar-time" id="topbarTime"></div>
     </div>
     <div id="modeBadge" class="mode-badge mode-ccs">CCS</div>
@@ -182,18 +170,9 @@ ORB Strategy - Agentic Account:
 
   <div class="main">
     <div class="market-row">
-      <div class="market-pill">
-        <div class="label">Market</div>
-        <div class="value" id="marketStatus">—</div>
-      </div>
-      <div class="market-pill">
-        <div class="label">Mode</div>
-        <div class="value" id="modeDisplay">—</div>
-      </div>
-      <div class="market-pill">
-        <div class="label">CST</div>
-        <div class="value" id="cstTime">—</div>
-      </div>
+      <div class="market-pill"><div class="lbl">Market</div><div class="val" id="marketStatus">—</div></div>
+      <div class="market-pill"><div class="lbl">Mode</div><div class="val" id="modeDisplay">—</div></div>
+      <div class="market-pill"><div class="lbl">CST</div><div class="val" id="cstTime">—</div></div>
     </div>
 
     <div class="tabs">
@@ -210,17 +189,17 @@ ORB Strategy - Agentic Account:
       </div>
       <div class="response-scroll" id="responseScroll">
         <div class="response-content" id="responseContent">
-          <div style="text-align:center; padding: 32px 0; color: var(--muted);">
-            <div style="font-size:32px; margin-bottom:10px;">📊</div>
+          <div style="text-align:center;padding:32px 0;color:var(--muted);">
+            <div style="font-size:32px;margin-bottom:10px;">📊</div>
             <div style="font-size:14px;">Tap Run to check your positions</div>
-            <div style="font-size:12px; margin-top:6px; color: var(--muted);">Auto-detects CCS or ORB based on time</div>
+            <div style="font-size:12px;margin-top:6px;">Auto-detects CCS or ORB based on time</div>
           </div>
         </div>
       </div>
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-green" onclick="runAutoCheck()" id="runBtn">
+      <button class="btn btn-green" onclick="runAutoCheck()">
         ▶ Run
         <span class="btn-label" id="runBtnLabel">Auto detect</span>
       </button>
@@ -239,238 +218,264 @@ ORB Strategy - Agentic Account:
         <span class="btn-label">Day trade setup</span>
       </button>
     </div>
-
+    <button class="btn-full btn-surface" onclick="requestNotifications()" id="notifBtn" style="font-size:14px;color:var(--muted);">
+      🔔 Enable Notifications
+    </button>
     <div class="safe-bottom"></div>
   </div>
 </div>
 
 <script>
-// ── CONSTANTS ────────────────────────────────────────────────────────────────
+// ── STORAGE: tries localStorage, falls back to sessionStorage ─────────────────
+const store = {
+  get(k) {
+    try { const v = localStorage.getItem(k); if (v !== null) return v; } catch(e){}
+    try { return sessionStorage.getItem(k); } catch(e){ return null; }
+  },
+  set(k,v) {
+    try { localStorage.setItem(k,v); } catch(e){}
+    try { sessionStorage.setItem(k,v); } catch(e){}
+  },
+  has(k) { return this.get(k) !== null; }
+};
+
+// ── CONSTANTS ─────────────────────────────────────────────────────────────────
 const HOLIDAYS = ['2026-01-01','2026-01-19','2026-02-16','2026-04-03','2026-05-25','2026-07-03','2026-07-04','2026-09-07','2026-11-26','2026-12-25'];
 const EARLY_CLOSE = ['2026-07-03','2026-11-27','2026-12-24'];
 
 // ── TIME ─────────────────────────────────────────────────────────────────────
-function getCSTDate() {
-  return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' }));
-}
-function dateStr(d) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
+function getCSTDate() { return new Date(new Date().toLocaleString('en-US',{timeZone:'America/Chicago'})); }
+function dateStr(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function isHoliday(d) { return HOLIDAYS.includes(dateStr(d)); }
 function isEarlyClose(d) { return EARLY_CLOSE.includes(dateStr(d)); }
-function isWeekend(d) { return d.getDay() === 0 || d.getDay() === 6; }
+function isWeekend(d) { return d.getDay()===0||d.getDay()===6; }
 function isORBDay(d) { return [1,3,5].includes(d.getDay()); }
-
 function getMarketState(d) {
-  if (isWeekend(d) || isHoliday(d)) return 'closed';
-  const mins = d.getHours()*60 + d.getMinutes();
-  const closeMin = isEarlyClose(d) ? 13*60 : 15*60+30;
-  if (mins < 8*60+30) return 'premarket';
-  if (mins >= closeMin) return 'afterhours';
+  if (isWeekend(d)||isHoliday(d)) return 'closed';
+  const m = d.getHours()*60+d.getMinutes();
+  const close = isEarlyClose(d)?13*60:15*60+30;
+  if (m<8*60+30) return 'premarket';
+  if (m>=close) return 'afterhours';
   return 'open';
 }
-
 function getMode(d) {
-  const state = getMarketState(d);
-  const mins = d.getHours()*60 + d.getMinutes();
-  if (state === 'closed' || state === 'afterhours') {
-    if (state === 'afterhours') return { mode:'eod', label:'EOD', badge:'mode-eod' };
-    return { mode:'closed', label:'CLOSED', badge:'mode-closed' };
-  }
-  if (state === 'premarket') {
-    return isORBDay(d)
-      ? { mode:'orb-pre', label:'ORB PRE', badge:'mode-orb' }
-      : { mode:'pre', label:'PRE-MKT', badge:'mode-ccs' };
-  }
-  if (isORBDay(d) && mins <= 9*60+45) return { mode:'orb-live', label:'ORB LIVE', badge:'mode-orb' };
-  if (mins >= 14*60+30) return { mode:'eod', label:'EOD', badge:'mode-eod' };
-  return { mode:'ccs', label:'CCS', badge:'mode-ccs' };
+  const s = getMarketState(d), m = d.getHours()*60+d.getMinutes();
+  if (s==='closed') return {mode:'closed',label:'CLOSED',badge:'mode-closed'};
+  if (s==='afterhours') return {mode:'eod',label:'EOD',badge:'mode-eod'};
+  if (s==='premarket') return isORBDay(d)?{mode:'orb-pre',label:'ORB PRE',badge:'mode-orb'}:{mode:'pre',label:'PRE-MKT',badge:'mode-ccs'};
+  if (isORBDay(d)&&m<=9*60+45) return {mode:'orb-live',label:'ORB LIVE',badge:'mode-orb'};
+  if (m>=14*60+30) return {mode:'eod',label:'EOD',badge:'mode-eod'};
+  return {mode:'ccs',label:'CCS',badge:'mode-ccs'};
 }
 
-// ── CLOCK ────────────────────────────────────────────────────────────────────
+// ── CLOCK ─────────────────────────────────────────────────────────────────────
 function updateClock() {
-  const d = getCSTDate();
-  const mi = getMode(d);
-  const ts = d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  const d = getCSTDate(), mi = getMode(d);
   document.getElementById('topbarTime').textContent = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-  document.getElementById('cstTime').textContent = ts + ' CST';
+  document.getElementById('cstTime').textContent = d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+' CST';
   const badge = document.getElementById('modeBadge');
-  badge.textContent = mi.label; badge.className = 'mode-badge ' + mi.badge;
+  badge.textContent = mi.label; badge.className = 'mode-badge '+mi.badge;
   document.getElementById('modeDisplay').textContent = mi.label;
-  const ms = getMarketState(d);
-  const el = document.getElementById('marketStatus');
-  if (ms === 'open') { el.textContent = 'Open'; el.className = 'value up'; }
-  else if (ms === 'premarket') { el.textContent = 'Pre'; el.className = 'value neutral'; }
-  else { el.textContent = 'Closed'; el.className = 'value down'; }
-  const lbl = { 'orb-live':'ORB trade!', 'orb-pre':'ORB prep', 'ccs':'CCS check', 'eod':'EOD summary', 'closed':'Portfolio', 'pre':'Pre-mkt' };
-  document.getElementById('runBtnLabel').textContent = lbl[mi.mode] || 'Auto detect';
+  const ms = getMarketState(d), el = document.getElementById('marketStatus');
+  if (ms==='open'){el.textContent='Open';el.className='val up';}
+  else if (ms==='premarket'){el.textContent='Pre';el.className='val neutral';}
+  else{el.textContent='Closed';el.className='val down';}
+  const lbl={orb_live:'ORB trade!','orb-pre':'ORB prep',ccs:'CCS check',eod:'EOD summary',closed:'Portfolio',pre:'Pre-mkt'};
+  document.getElementById('runBtnLabel').textContent = lbl[mi.mode]||'Auto detect';
 }
 
-// ── UI ───────────────────────────────────────────────────────────────────────
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function showToast(msg, type='green', duration=3000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast toast-'+type+' show';
+  setTimeout(()=>{ t.className='toast'; },duration);
+}
+
+// ── NOTIFICATIONS ─────────────────────────────────────────────────────────────
+async function requestNotifications() {
+  if (!('Notification' in window)) {
+    showToast('Notifications not supported on this device', 'red'); return;
+  }
+  if (Notification.permission === 'granted') {
+    showToast('Notifications already enabled ✅'); return;
+  }
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    showToast('Notifications enabled! ✅');
+    store.set('ravi_notif','1');
+    document.getElementById('notifBtn').textContent = '🔔 Notifications: ON';
+  } else {
+    showToast('Notifications blocked — enable in iPhone Settings', 'red', 4000);
+  }
+}
+
+function sendNotification(title, body) {
+  if (Notification.permission==='granted') {
+    new Notification(title, { body, icon: '📈', badge: '📊' });
+  }
+}
+
+// ── UI ────────────────────────────────────────────────────────────────────────
 function showLoader(text) {
-  document.getElementById('loaderEl').style.display = 'flex';
-  document.getElementById('loaderText').textContent = text;
-  document.getElementById('responseContent').style.display = 'none';
+  document.getElementById('loaderEl').style.display='flex';
+  document.getElementById('loaderText').textContent=text;
+  document.getElementById('responseContent').style.display='none';
 }
 function hideLoader() {
-  document.getElementById('loaderEl').style.display = 'none';
-  document.getElementById('responseContent').style.display = 'block';
+  document.getElementById('loaderEl').style.display='none';
+  document.getElementById('responseContent').style.display='block';
 }
-
-function renderResponse(text) {
+function renderResponse(text, notify=false) {
   hideLoader();
   const el = document.getElementById('responseContent');
-  // Basic safe rendering — convert markdown-ish to readable HTML
   let html = text
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/🟢/g,'<span class="tag-green">🟢</span>')
-    .replace(/✅/g,'<span class="tag-green">✅</span>')
-    .replace(/🚨/g,'<span class="tag-red">🚨</span>')
-    .replace(/🔴/g,'<span class="tag-red">🔴</span>')
-    .replace(/⚠️/g,'<span class="tag-yellow">⚠️</span>')
-    .replace(/🎯/g,'<span class="tag-blue">🎯</span>')
+    .replace(/🟢/g,'<span class="tg">🟢</span>')
+    .replace(/✅/g,'<span class="tg">✅</span>')
+    .replace(/🚨/g,'<span class="tr">🚨</span>')
+    .replace(/🔴/g,'<span class="tr">🔴</span>')
+    .replace(/⚠️/g,'<span class="ty">⚠️</span>')
+    .replace(/🎯/g,'<span class="tb">🎯</span>')
     .replace(/\n{2,}/g,'</p><p class="md-p">')
     .replace(/\n/g,'<br>');
-  el.innerHTML = '<p class="md-p">' + html + '</p>';
-  document.getElementById('responseScroll').scrollTop = 0;
+  el.innerHTML = '<p class="md-p">'+html+'</p>';
+  document.getElementById('responseScroll').scrollTop=0;
+
+  // Send notification with first 100 chars as summary
+  if (notify && store.get('ravi_notif')) {
+    const summary = text.replace(/\*\*/g,'').slice(0,120).trim();
+    sendNotification('📈 Trading Check', summary);
+  }
 }
 
-// ── CLAUDE API ───────────────────────────────────────────────────────────────
-async function callClaude(userPrompt) {
-  const apiKey = localStorage.getItem('ravi_apiKey');
-  if (!apiKey) throw new Error('No API key. Go to Setup.');
-
+// ── CLAUDE API ────────────────────────────────────────────────────────────────
+async function callClaude(prompt) {
+  const apiKey = store.get('ravi_apiKey');
+  if (!apiKey) throw new Error('No API key saved. Go to Setup (⚙️ tab).');
   const d = getCSTDate();
   const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const timeCtx = `Time: ${d.toLocaleTimeString('en-US',{timeZone:'America/Chicago'})} CST, ${days[d.getDay()]} ${dateStr(d)}. Market: ${getMarketState(d)}.${isEarlyClose(d)?' Early close (1PM CST).':''}${isHoliday(d)?' Holiday.':''}`;
-
-  const strategy = localStorage.getItem('ravi_strategy') || '';
-  const name = localStorage.getItem('ravi_name') || 'Ravi';
-
-  const sys = `You are ${name}'s personal trading assistant. Be extremely concise and mobile-friendly. Use emojis for scanning. Max 250 words. Always end with a clear ACTION: HOLD / ROLL / CLOSE / TRADE / SKIP.\n\n${timeCtx}\n\nStrategy:\n${strategy}`;
-
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1000,
-      system: sys,
-      messages: [{ role: 'user', content: userPrompt }]
-    })
+  const timeCtx = `Time: ${d.toLocaleTimeString('en-US')} CST, ${days[d.getDay()]} ${dateStr(d)}. Market: ${getMarketState(d)}.${isEarlyClose(d)?' Early close today (1PM CST).':''}${isHoliday(d)?' Market holiday.':''}`;
+  const strategy = store.get('ravi_strategy')||'';
+  const name = store.get('ravi_name')||'Ravi';
+  const sys = `You are ${name}'s personal trading assistant. Be extremely concise and mobile-friendly. Use emojis for quick visual scanning. Max 200 words. Always end with a clear bold ACTION line: **ACTION: HOLD / ROLL / CLOSE / TRADE / SKIP**.\n\n${timeCtx}\n\nStrategy:\n${strategy}`;
+  const res = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,system:sys,messages:[{role:'user',content:prompt}]})
   });
-
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error?.message || `HTTP ${res.status}`);
+    const err = await res.json().catch(()=>({}));
+    throw new Error(err?.error?.message||`HTTP ${res.status}`);
   }
-
   const data = await res.json();
   return data.content[0].text;
 }
 
-// ── ACTIONS ──────────────────────────────────────────────────────────────────
+// ── ACTIONS ───────────────────────────────────────────────────────────────────
 async function runAutoCheck() {
-  const d = getCSTDate();
-  const mi = getMode(d);
+  const d = getCSTDate(), mi = getMode(d);
   const prompts = {
-    'orb-live': 'ORB WINDOW IS OPEN (9:30-9:45 AM). Give me: 1) Go or No-go 2) Direction: call or put based on pre-market direction 3) Suggested strike and what breakout level to watch. Be fast — I have minutes to decide.',
-    'orb-pre': 'Pre-market ORB prep. Go/No-go for today\'s ORB trade, direction bias, and key QQQ level to watch at open.',
-    'ccs': 'CCS check. PLTR Oct 16 $140 call and RDDT Aug 21 $200 call. Status of each — distance to strike, any action needed? HOLD/ROLL/CLOSE.',
-    'eod': 'End of day. PLTR Oct 16 $140 and RDDT Aug 21 $200. Any action before tomorrow? Overnight risk?',
-    'closed': 'Market closed. Brief portfolio health on PLTR Oct 16 $140 call and RDDT Aug 21 $200 call. Anything to watch for next open?',
-    'pre': 'Pre-market check. PLTR and RDDT covered calls status. Anything to watch at open today?'
+    'orb-live':'ORB WINDOW OPEN NOW (9:30-9:45 AM). Fast go/no-go: 1) Direction: call or put? 2) Why 3) What breakout level to watch. I have minutes.',
+    'orb-pre':'Pre-market ORB prep. Go/No-go for today. Direction bias and key QQQ level to watch at open.',
+    'ccs':'CCS check. PLTR Oct 16 $140 and RDDT Aug 21 $200. Distance to strike, P&L on each option, any action needed?',
+    'eod':'End of day. PLTR Oct 16 $140 and RDDT Aug 21 $200. Action before tomorrow? Overnight risk?',
+    'closed':'Market closed. Portfolio health on PLTR Oct 16 $140 and RDDT Aug 21 $200. What to watch next open?',
+    'pre':'Pre-market. PLTR and RDDT covered calls status. Anything to watch at open?'
   };
-  const loaders = {
-    'orb-live':'🎯 ORB window — go/no-go...', 'orb-pre':'🎯 ORB prep...',
-    'ccs':'📋 CCS check...', 'eod':'📊 End of day...', 'closed':'📊 Portfolio check...', 'pre':'📊 Pre-market...'
-  };
-  showLoader(loaders[mi.mode] || 'Checking...');
-  try { renderResponse(await callClaude(prompts[mi.mode] || prompts['ccs'])); }
-  catch(e) { renderResponse('❌ ' + e.message); }
+  const loaders={'orb-live':'🎯 ORB window...','orb-pre':'🎯 ORB prep...','ccs':'📋 CCS check...','eod':'📊 End of day...','closed':'📊 Portfolio...','pre':'📊 Pre-market...'};
+  showLoader(loaders[mi.mode]||'Checking...');
+  try { const r = await callClaude(prompts[mi.mode]||prompts['ccs']); renderResponse(r, true); }
+  catch(e) { renderResponse('❌ '+e.message); showToast(e.message,'red',5000); }
 }
 
 async function runQuickStatus() {
   showLoader('⚡ Quick status...');
-  try { renderResponse(await callClaude('One line each: PLTR Oct 16 $140 call status, RDDT Aug 21 $200 call status. Just distance to strike and HOLD/WATCH/ACT.')); }
-  catch(e) { renderResponse('❌ ' + e.message); }
+  try { const r = await callClaude('One line each: PLTR Oct 16 $140 call and RDDT Aug 21 $200 call. Distance to strike and HOLD/WATCH/ACT only.'); renderResponse(r, false); }
+  catch(e) { renderResponse('❌ '+e.message); }
 }
 
 async function runSpecific(type) {
   const d = getCSTDate();
   const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  if (type === 'ccs') {
+  if (type==='ccs') {
     showLoader('📋 CCS check...');
-    try { renderResponse(await callClaude('Full CCS check. PLTR Oct 16 $140 (net premium $502), RDDT Aug 21 $200 ($1,645). NFLX 100 shares cost $84.94 no call. For each active call: distance to strike, P&L on option, action. Is NFLX ready for a call yet?')); }
-    catch(e) { renderResponse('❌ ' + e.message); }
+    try { const r = await callClaude('Full CCS. PLTR Oct 16 $140 (net premium $502), RDDT Aug 21 $200 ($1,645), NFLX 100sh cost $84.94 no call. Each active call: distance to strike, action. NFLX ready for a call?'); renderResponse(r, true); }
+    catch(e) { renderResponse('❌ '+e.message); }
   } else {
     showLoader('🎯 ORB check...');
-    try { renderResponse(await callClaude(`ORB check. Today is ${days[d.getDay()]}. Is it an ORB day? Go/No-go? If go: direction and what to look for. Agentic account ~$994, max trade $150, buying power currently low (waiting on $500 deposit).`)); }
-    catch(e) { renderResponse('❌ ' + e.message); }
+    try { const r = await callClaude(`ORB check. Today: ${days[d.getDay()]}. ORB day? Go/No-go? If go: direction and breakout level. Account ~$994, max trade $150.`); renderResponse(r, true); }
+    catch(e) { renderResponse('❌ '+e.message); }
   }
 }
 
-// ── TABS ─────────────────────────────────────────────────────────────────────
+// ── TABS ──────────────────────────────────────────────────────────────────────
 function switchTab(tab) {
-  ['auto','ccs','orb','setup'].forEach(t => document.getElementById('tab-'+t).classList.toggle('active', t===tab));
-  if (tab === 'setup') { document.getElementById('mainScreen').classList.add('hidden'); document.getElementById('setupScreen').classList.remove('hidden'); return; }
-  if (tab !== 'auto') runSpecific(tab);
+  ['auto','ccs','orb','setup'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('active',t===tab));
+  if (tab==='setup'){document.getElementById('mainScreen').classList.add('hidden');document.getElementById('setupScreen').classList.remove('hidden');return;}
+  if (tab!=='auto') runSpecific(tab);
 }
 
-// ── SETUP ────────────────────────────────────────────────────────────────────
-function showBanner(type, msg) {
-  const el = document.getElementById(type === 'error' ? 'errorBanner' : 'successBanner');
-  el.textContent = msg; el.style.display = 'block';
-  setTimeout(() => el.style.display = 'none', 4000);
+// ── SETUP ─────────────────────────────────────────────────────────────────────
+function toggleKeyVisibility() {
+  const inp = document.getElementById('apiKeyInput');
+  inp.type = inp.type==='password'?'text':'password';
 }
-
+function showBanner(type,msg) {
+  const el = document.getElementById(type==='error'?'errorBanner':'successBanner');
+  el.textContent=msg; el.style.display='block';
+  setTimeout(()=>el.style.display='none',5000);
+}
 async function testApiKey() {
   const key = document.getElementById('apiKeyInput').value.trim();
-  if (!key) { showBanner('error', 'Please enter an API key first'); return; }
-  showBanner('success', 'Testing key...');
+  if (!key){showBanner('error','Enter an API key first');return;}
+  showBanner('success','Testing...');
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json', 'x-api-key':key, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
-      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:20, messages:[{role:'user',content:'Say OK'}] })
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:10,messages:[{role:'user',content:'Hi'}]})
     });
     const data = await res.json();
-    if (data.content) showBanner('success', '✅ API key works! Save & Launch when ready.');
-    else showBanner('error', '❌ Invalid key: ' + (data?.error?.message || 'Unknown error'));
-  } catch(e) { showBanner('error', '❌ Error: ' + e.message); }
+    if (data.content) showBanner('success','✅ Key works! Hit Save & Launch.');
+    else showBanner('error','❌ '+( data?.error?.message||'Invalid key'));
+  } catch(e){showBanner('error','❌ '+e.message);}
 }
-
 function saveSetup() {
   const key = document.getElementById('apiKeyInput').value.trim();
-  if (!key) { showBanner('error', 'API key required'); return; }
-  localStorage.setItem('ravi_apiKey', key);
-  localStorage.setItem('ravi_name', document.getElementById('nameInput').value.trim() || 'Ravi');
-  localStorage.setItem('ravi_strategy', document.getElementById('strategyInput').value.trim());
-  localStorage.setItem('ravi_setup', '1');
-  document.getElementById('setupScreen').classList.add('hidden');
-  document.getElementById('mainScreen').classList.remove('hidden');
-  updateClock();
-  setInterval(updateClock, 1000);
-}
-
-// ── INIT ─────────────────────────────────────────────────────────────────────
-function init() {
-  if (localStorage.getItem('ravi_setup')) {
-    // Prefill setup fields
-    document.getElementById('apiKeyInput').value = localStorage.getItem('ravi_apiKey') || '';
-    document.getElementById('nameInput').value = localStorage.getItem('ravi_name') || 'Ravi';
-    document.getElementById('strategyInput').value = localStorage.getItem('ravi_strategy') || document.getElementById('strategyInput').value;
+  if (!key){showBanner('error','API key required');return;}
+  store.set('ravi_apiKey',key);
+  store.set('ravi_name','Ravi');
+  store.set('ravi_strategy',document.getElementById('strategyInput').value.trim());
+  store.set('ravi_setup','1');
+  showToast('Saved! ✅');
+  setTimeout(()=>{
     document.getElementById('setupScreen').classList.add('hidden');
     document.getElementById('mainScreen').classList.remove('hidden');
-    updateClock();
-    setInterval(updateClock, 1000);
-    if (new URLSearchParams(window.location.search).get('auto') === '1') setTimeout(runAutoCheck, 600);
+    updateClock(); setInterval(updateClock,1000);
+  },600);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+function init() {
+  // Detect if running as installed PWA vs browser
+  const isPWA = window.navigator.standalone===true || window.matchMedia('(display-mode: standalone)').matches;
+  if (!isPWA && !store.has('ravi_setup')) {
+    document.getElementById('installBanner').classList.remove('hidden');
+  }
+
+  if (store.has('ravi_setup')) {
+    // Prefill setup
+    document.getElementById('apiKeyInput').value = store.get('ravi_apiKey')||'';
+    document.getElementById('strategyInput').value = store.get('ravi_strategy')||document.getElementById('strategyInput').value;
+    document.getElementById('setupScreen').classList.add('hidden');
+    document.getElementById('mainScreen').classList.remove('hidden');
+    updateClock(); setInterval(updateClock,1000);
+    // Update notification button
+    if (store.get('ravi_notif')) document.getElementById('notifBtn').textContent='🔔 Notifications: ON';
+    // Auto-run if launched via Shortcut
+    if (new URLSearchParams(window.location.search).get('auto')==='1') setTimeout(runAutoCheck,600);
   }
 }
 init();
